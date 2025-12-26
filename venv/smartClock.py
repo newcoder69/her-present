@@ -2,6 +2,7 @@ import pygame
 import os
 from datetime import datetime
 import json
+import time
 
 
 
@@ -23,8 +24,15 @@ font_path = "C:/Users/Gabe/Desktop/miscCode/herPresent/pythonPart/PixelatedElega
 pixel_font = pygame.font.Font(font_path)
 
 screen =  pygame.display.set_mode((screenWidth, screenHeight))
-
+clock = pygame.time.Clock()
 running = True
+
+frog_fps = 12
+frame_time = 1.0 / frog_fps
+frame_i = 0
+last_frame_switch = time.time()
+
+
 
 time_font = pygame.font.Font(font_path,68)
 date_font = pygame.font.Font(font_path,28)
@@ -34,11 +42,27 @@ softWhite = (235,235,235)
 softgrey = (150,150,150)
 pink = (255,140,160)
 
-background = (15,56,15)
-primary = (155,188,15)
-secondary = (139,172,15)
+background = (76,186,145)
+primary = (255,188,15)
+secondary = (0,0,0)
 text = (233,239,236)
 
+trademark_font = pygame.font.Font(font_path,10)
+
+trademark_message = "This clock is a gift from Gabe <3"
+
+folderPath = "C:/Users/Gabe/Desktop/miscCode/herPresent/pythonPart/frogFrames"
+files = os.listdir(folderPath)
+
+
+def loadFrames(folderPath):
+    frames = []
+    for f in files:
+        frame = pygame.image.load(os.path.join(folderPath,f)).convert_alpha()
+        frames.append(frame)
+    return frames
+
+frog_frames = loadFrames(folderPath)
 while running:
     screen.fill(background)
     
@@ -48,6 +72,24 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+            
+            
+    now = time.time()
+    if now - last_frame_switch >= frame_time:
+        frame_i = (frame_i + 1) % len(frog_frames)
+        last_frame_switch = now
+    
+    frog = frog_frames[frame_i]
+    frog = pygame.transform.smoothscale(frog, (96,96))
+
+    
+    x = screenWidth - 106
+    y = screenHeight - 106
+    
+    x2 = 10
+    y2 = screenHeight - 106
+    
+    
     
     
     
@@ -76,16 +118,25 @@ while running:
     date_box = date_surface.get_rect()
     date_box.center = (screenWidth // 2, (screenHeight // screenHeight) + 120)
     
+    trademark_surface = trademark_font.render(trademark_message,True,secondary)
+    trademark_box = trademark_surface.get_rect()
+    trademark_box.center = (screenWidth // 2, (screenHeight) - 50)
+    
     
     
     
     screen.blit(time_surface,time_box)
     screen.blit(text_surface, text_box )
     screen.blit(date_surface, date_box)
+    screen.blit(frog, (x,y))
+    screen.blit(frog,(x2,y2))
+    screen.blit(trademark_surface,trademark_box)
+   
     # screen.blit(heart, heart_box)
     
     
     pygame.display.flip()
+    clock.tick(60)
 
 
 pygame.quit()
